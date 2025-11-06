@@ -41,7 +41,9 @@ int main(void) {
 
             /*列の区切り線を入れる*/
             if (j == 2 || j == 5){
+                printf("\x1b[36m");
                 printf(" | ");
+                printf("\x1b[0m");
             }
         }
 
@@ -50,36 +52,48 @@ int main(void) {
 
         /*行の区切り線を入れる*/
         if (i == 2 || i == 5){
+            printf("\x1b[36m");
             printf("--------------------------------\n");
+            printf("\x1b[0m");
         }
     }
     /*ここまでが盤面の表示を繰り返す処理*/
 
     /*入力欄の表示*/
+    printf("\x1b[36m");
     printf("\n---------------------------------------------------------------------------------------------\n");
     printf("※　数字の間にゎ、空白を入れて、半角の数字のみで入力してください。　※\n");
     printf("上から何番目か（１～９）、左から何番目か（１－９）、入れたい数字（１－９）の順で入力してください。（例：1 2 3）\n");
     printf("-1 と入力すると、強制終了ができます。\n");
+    printf("\x1b[34m");
     printf("入力欄：");
+    printf("\x1b[0m");
 
 
     int scan_result = scanf("%d", &row);
 
     if (scan_result == 1 && row == -1){
         printf("\n強制終了します。\n");
-        while (getchar() != '\n' && getchar() != EOF);
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF);
         return 0;
     }
 
     if (scan_result != 1){
-        printf("\n入力が正しくありません。※の条件に従って入力してください。\n");
-        while (getchar() != '\n' && getchar() != EOF);
+        printf("\x1b[31m");
+        printf("\n入力が正しくありません。※ の条件に従って入力してください。\n");
+        printf("\x1b[0m");
+        int ch; 
+        while ((ch = getchar()) != '\n' && ch != EOF);
         continue;
     }
 
     if (scanf("%d %d", &col, &num) != 2){
+        printf("\x1b[31m");
         printf("\n入力が正しくありません。例の通りに入力してください。");
-        while (getchar() != '\n' && getchar() != EOF);
+        printf("\x1b[0m");
+        int ch; 
+        while ((ch = getchar()) != '\n' && ch != EOF);
         continue;
     }
 
@@ -89,23 +103,31 @@ int main(void) {
 
     /*★ここから入力した値のチェック処理*/
     if (row < 0 || row > 8 || col < 0 || col > 8){
+        printf("\x1b[31m");
         printf("行と列は１～９の範囲で入力してください。\n");
+        printf("\x1b[0m");
         continue;
 
     }
 
     if (num < 1 || num > 9){
+        printf("\x1b[31m");
         printf("数字は１～９の範囲で入力してください。\n");
+        printf("\x1b[0m");
         continue;
     }
 
     if (board[row][col] != 0){
+        printf("\x1b[31m");
         printf("そのマスにゎ、問題として数字が埋まっているため、変更ゎできません。\n");
+        printf("\x1b[0m");
         continue;
     }
 
     if (!is_valid(board, row, col, num)){
+        printf("\x1b[31m");
         printf("その数字ゎ、縦・横またゎ、３×３のボックス内で重複しています。\n");
+        printf("\x1b[0m");
     }
 
     board[row][col] = num;
@@ -114,9 +136,11 @@ int main(void) {
 
     if (is_solved(board)){
 
+        printf("\x1b[33m");
         printf("\n==================================\n");
         printf("★ ★ ★ ★ ★ ゲームクリア ★ ★ ★ ★ ★\n");
         printf("==================================\n");
+        printf("\x1b[0m");
         break;
     }
 
