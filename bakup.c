@@ -2,6 +2,9 @@
 
 int is_valid(int board[9][9], int r, int c, int val);
 int is_solved(int board[9][9]);
+int solve(int board[9][9]);
+void display_board(int board[9][9]);
+
 
 int main(void) {
     /*盤面のデータ*/
@@ -41,7 +44,9 @@ int main(void) {
 
             /*列の区切り線を入れる*/
             if (j == 2 || j == 5){
+                printf("\x1b[36m");
                 printf(" | ");
+                printf("\x1b[0m");
             }
         }
 
@@ -50,35 +55,77 @@ int main(void) {
 
         /*行の区切り線を入れる*/
         if (i == 2 || i == 5){
+            printf("\x1b[36m");
             printf("--------------------------------\n");
+            printf("\x1b[0m");
         }
     }
     /*ここまでが盤面の表示を繰り返す処理*/
 
     /*入力欄の表示*/
+    printf("\x1b[36m");
     printf("\n---------------------------------------------------------------------------------------------\n");
     printf("※　数字の間にゎ、空白を入れて、半角の数字のみで入力してください。　※\n");
-    printf("上から何番目か（１～９）、左から何番目か（１－９）、入れたい数字（１－９）の順で入力してください。（例：１ １ ５）\n");
+    printf("上から何番目か（１～９）、左から何番目か（１－９）、入れたい数字（１－９）の順で入力してください。（例：1 2 3）\n");
     printf("-1 と入力すると、強制終了ができます。\n");
+    printf("\x1b[34m");
     printf("入力欄：");
+    printf("\x1b[0m");
 
 
-    /*入力数値が３つ（行　列　数字）であるかの確認*/
-    if (scanf("%d %d %d", &row, &col, &num) != 3){
-        printf("\n入力が間違っています。もう一度正しく入力してください。\n");
+    int scan_result = scanf("%d", &row);
 
-        /*入力された値が半角数字かの確認処理*/
+    if (scan_result == 1 && row == -1){
+        printf("\n強制終了します。\n");
         int ch;
-
         while ((ch = getchar()) != '\n' && ch != EOF);
-
-        continue; /*間違っていた場合、ループをやり直し*/
+        return 0;
     }
 
-    /*強制終了の処理*/
-    if (row == -1 || col == -1){
-        printf("\n強制終了しました。\n");
-        return 0;
+
+// ★★★ 2. ソルブ＆答え表示コマンド (-2) の修正 ★★★
+if (scan_result == 1 && row == -2){
+    
+    // 答えを出す前にバッファクリア（もしユーザーが "-2 a b" のように入力した場合のため）
+    int ch; while ((ch = getchar()) != '\n' && ch != EOF); 
+
+    // solve関数が成功したかどうかを判定
+    if (solve(board)) {
+        printf("\n==================================\n");
+        printf(" ★ ★ 盤面をすべて、埋めました。 ★ ★\n");
+        printf("==================================\n");
+        
+        // 答えが埋まった盤面を表示
+        display_board(board);
+    } else {
+        printf("\n==================================\n");
+        printf("\x1b[31m"); // 赤色開始
+        printf(" ⚠️ 問題が成立していません (解けません)。 ⚠️\n");
+        printf("\x1b[0m");  // 色リセット
+        printf("==================================\n");
+    }
+    
+    // 処理が完了したので、プログラムを終了
+    return 0; 
+}
+
+
+    if (scan_result != 1){
+        printf("\x1b[31m");
+        printf("\n入力が正しくありません。※ の条件に従って入力してください。\n");
+        printf("\x1b[0m");
+        int ch; 
+        while ((ch = getchar()) != '\n' && ch != EOF);
+        continue;
+    }
+
+    if (scanf("%d %d", &col, &num) != 2){
+        printf("\x1b[31m");
+        printf("\n入力が正しくありません。例の通りに入力してください。");
+        printf("\x1b[0m");
+        int ch; 
+        while ((ch = getchar()) != '\n' && ch != EOF);
+        continue;
     }
 
     /*入力した値を配列番号と合わせる*/
@@ -87,23 +134,31 @@ int main(void) {
 
     /*★ここから入力した値のチェック処理*/
     if (row < 0 || row > 8 || col < 0 || col > 8){
+        printf("\x1b[31m");
         printf("行と列は１～９の範囲で入力してください。\n");
+        printf("\x1b[0m");
         continue;
 
     }
 
     if (num < 1 || num > 9){
+        printf("\x1b[31m");
         printf("数字は１～９の範囲で入力してください。\n");
+        printf("\x1b[0m");
         continue;
     }
 
     if (board[row][col] != 0){
+        printf("\x1b[31m");
         printf("そのマスにゎ、問題として数字が埋まっているため、変更ゎできません。\n");
+        printf("\x1b[0m");
         continue;
     }
 
     if (!is_valid(board, row, col, num)){
+        printf("\x1b[31m");
         printf("その数字ゎ、縦・横またゎ、３×３のボックス内で重複しています。\n");
+        printf("\x1b[0m");
     }
 
     board[row][col] = num;
@@ -112,9 +167,11 @@ int main(void) {
 
     if (is_solved(board)){
 
+        printf("\x1b[33m");
         printf("\n==================================\n");
         printf("★ ★ ★ ★ ★ ゲームクリア ★ ★ ★ ★ ★\n");
         printf("==================================\n");
+        printf("\x1b[0m");
         break;
     }
 
@@ -181,6 +238,7 @@ int is_valid (int board[9][9], int r, int c, int val){
 
 
 
+
 /*ゲームクリアの判定をする関数*/
 int is_solved(int board[9][9]) {
 
@@ -209,4 +267,74 @@ int is_solved(int board[9][9]) {
     }
 
     return 1;
+}
+
+
+
+
+
+/*盤面の自動完成*/
+// ★★★ solve 関数（ソルバーの基礎） ★★★
+int solve(int board[9][9]) {
+    
+    // 盤面を左上から順に走査し、空きマス（0）を探す
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            
+            if (board[r][c] == 0) { // ★ 空きマスを見つけたら
+
+                // 1から9までの数字を順番に試す
+                for (int num = 1; num <= 9; num++) {
+                    
+                    // 1. その数字を置いてもルール違反がないか、is_validで確認
+                    if (is_valid(board, r, c, num)) { 
+                        
+                        // 2. ルール違反がなければ、とりあえずその数字を置いてみる
+                        board[r][c] = num;
+                        
+                        // 3. ★再帰処理：次の空きマスも解けるか試す（最重要）
+                        if (solve(board)) {
+                            return 1; // 次のマス以降も全て解けたら、成功を返す
+                        }
+                        
+                        // 4. 次のマス以降が解けなかった場合（後戻り／バックトラック）
+                        //    → 置いた数字を 0 に戻し、次の num を試す
+                        board[r][c] = 0; 
+                    }
+                }
+                
+                // 1～9のどの数字を試しても解けなかった場合
+                return 0; // 失敗を返す（呼び出し元で後戻り処理が行われる）
+            }
+        }
+    }
+    
+    // 全てのマスに数字が埋まり、空きマスが見つからなかった場合
+    return 1; // 完成！成功を返す
+}
+
+
+
+
+
+/*盤面表示　関数*/
+void display_board(int board[9][9]) {
+    printf("\n");
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if (board[i][j] == 0) {
+                printf(" . ");
+            } else {
+                printf("%2d ", board[i][j]);
+            }
+            if ((j + 1) % 3 == 0 && j != 8) {
+                printf("| ");
+            }
+        }
+        printf("\n");
+        if ((i + 1) % 3 == 0 && i != 8) {
+            printf("---------|----------|---------\n");
+        }
+    }
+    printf("\n");
 }

@@ -2,6 +2,9 @@
 
 int is_valid(int board[9][9], int r, int c, int val);
 int is_solved(int board[9][9]);
+int solve(int board[9][9]);
+void display_board(int board[9][9]);
+
 
 int main(void) {
     /*盤面のデータ*/
@@ -24,40 +27,7 @@ int main(void) {
 
  /*入力のループ*/
  while (1) {
-    /*ここから、盤面の表示を繰り返す処理*/
-    /*行を０～８までを繰り返す*/
-    for (int i = 0; i < 9; i++) {
-
-        /*列を０～８までを繰り返す*/
-        for (int j = 0; j < 9; j++){
-
-            /*盤面の数字が０＝空のマスにゎ -　を表示*/
-            if(board[i][j] == 0){
-                printf(" - ");
-            } else {
-                /*盤面のマスに数値を表示する*/
-                printf("%2d ", board[i][j]);
-            }
-
-            /*列の区切り線を入れる*/
-            if (j == 2 || j == 5){
-                printf("\x1b[36m");
-                printf(" | ");
-                printf("\x1b[0m");
-            }
-        }
-
-        /*１行終わったら改行を入れる*/
-        printf("\n");
-
-        /*行の区切り線を入れる*/
-        if (i == 2 || i == 5){
-            printf("\x1b[36m");
-            printf("--------------------------------\n");
-            printf("\x1b[0m");
-        }
-    }
-    /*ここまでが盤面の表示を繰り返す処理*/
+    display_board(board);
 
     /*入力欄の表示*/
     printf("\x1b[36m");
@@ -78,6 +48,34 @@ int main(void) {
         while ((ch = getchar()) != '\n' && ch != EOF);
         return 0;
     }
+
+
+// ★★★ 2. ソルブ＆答え表示コマンド (-2) の修正 ★★★
+if (scan_result == 1 && row == -2){
+    
+    // 答えを出す前にバッファクリア（もしユーザーが "-2 a b" のように入力した場合のため）
+    int ch; while ((ch = getchar()) != '\n' && ch != EOF); 
+
+    // solve関数が成功したかどうかを判定
+    if (solve(board)) {
+        printf("\n==================================\n");
+        printf(" ★ ★ 盤面をすべて、埋めました。 ★ ★\n");
+        printf("==================================\n");
+        
+        // 答えが埋まった盤面を表示
+        display_board(board);
+    } else {
+        printf("\n==================================\n");
+        printf("\x1b[31m"); // 赤色開始
+        printf(" ⚠️ 問題が成立していません (解けません)。 ⚠️\n");
+        printf("\x1b[0m");  // 色リセット
+        printf("==================================\n");
+    }
+    
+    // 処理が完了したので、プログラムを終了
+    return 0; 
+}
+
 
     if (scan_result != 1){
         printf("\x1b[31m");
@@ -207,6 +205,7 @@ int is_valid (int board[9][9], int r, int c, int val){
 
 
 
+
 /*ゲームクリアの判定をする関数*/
 int is_solved(int board[9][9]) {
 
@@ -235,4 +234,78 @@ int is_solved(int board[9][9]) {
     }
 
     return 1;
+}
+
+
+
+
+
+/*盤面の自動完成*/
+// ★★★ solve 関数（ソルバーの基礎） ★★★
+int solve(int board[9][9]) {
+    
+    // 盤面を左上から順に走査し、空きマス（0）を探す
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            
+            if (board[r][c] == 0) { // ★ 空きマスを見つけたら
+
+                // 1から9までの数字を順番に試す
+                for (int num = 1; num <= 9; num++) {
+                    
+                    // 1. その数字を置いてもルール違反がないか、is_validで確認
+                    if (is_valid(board, r, c, num)) { 
+                        
+                        // 2. ルール違反がなければ、とりあえずその数字を置いてみる
+                        board[r][c] = num;
+                        
+                        // 3. ★再帰処理：次の空きマスも解けるか試す（最重要）
+                        if (solve(board)) {
+                            return 1; // 次のマス以降も全て解けたら、成功を返す
+                        }
+                        
+                        // 4. 次のマス以降が解けなかった場合（後戻り／バックトラック）
+                        //    → 置いた数字を 0 に戻し、次の num を試す
+                        board[r][c] = 0; 
+                    }
+                }
+                
+                // 1～9のどの数字を試しても解けなかった場合
+                return 0; // 失敗を返す（呼び出し元で後戻り処理が行われる）
+            }
+        }
+    }
+    
+    // 全てのマスに数字が埋まり、空きマスが見つからなかった場合
+    return 1; // 完成！成功を返す
+}
+
+
+
+
+
+/*盤面表示　関数*/
+void display_board(int board[9][9]) {
+    printf("\n");
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if (board[i][j] == 0) {
+                printf(" - ");
+            } else {
+                printf("%2d ", board[i][j]);
+            }
+            if ((j + 1) % 3 == 0 && j != 8) {
+                printf("\x1b[36m");
+                printf("| ");
+                printf("\x1b[0m");
+            }
+        }
+        printf("\n");
+        if ((i + 1) % 3 == 0 && i != 8) {
+            printf("\x1b[36m");
+            printf("---------|----------|---------\n");
+            printf("\x1b[0m");
+        }
+    }
+    printf("\n");
 }
