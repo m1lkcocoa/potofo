@@ -27,40 +27,7 @@ int main(void) {
 
  /*入力のループ*/
  while (1) {
-    /*ここから、盤面の表示を繰り返す処理*/
-    /*行を０～８までを繰り返す*/
-    for (int i = 0; i < 9; i++) {
-
-        /*列を０～８までを繰り返す*/
-        for (int j = 0; j < 9; j++){
-
-            /*盤面の数字が０＝空のマスにゎ -　を表示*/
-            if(board[i][j] == 0){
-                printf(" - ");
-            } else {
-                /*盤面のマスに数値を表示する*/
-                printf("%2d ", board[i][j]);
-            }
-
-            /*列の区切り線を入れる*/
-            if (j == 2 || j == 5){
-                printf("\x1b[36m");
-                printf(" | ");
-                printf("\x1b[0m");
-            }
-        }
-
-        /*１行終わったら改行を入れる*/
-        printf("\n");
-
-        /*行の区切り線を入れる*/
-        if (i == 2 || i == 5){
-            printf("\x1b[36m");
-            printf("--------------------------------\n");
-            printf("\x1b[0m");
-        }
-    }
-    /*ここまでが盤面の表示を繰り返す処理*/
+    display_board(board);
 
     /*入力欄の表示*/
     printf("\x1b[36m");
@@ -323,17 +290,21 @@ void display_board(int board[9][9]) {
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             if (board[i][j] == 0) {
-                printf(" . ");
+                printf(" - ");
             } else {
                 printf("%2d ", board[i][j]);
             }
             if ((j + 1) % 3 == 0 && j != 8) {
+                printf("\x1b[36m");
                 printf("| ");
+                printf("\x1b[0m");
             }
         }
         printf("\n");
         if ((i + 1) % 3 == 0 && i != 8) {
+            printf("\x1b[36m");
             printf("---------|----------|---------\n");
+            printf("\x1b[0m");
         }
     }
     printf("\n");
